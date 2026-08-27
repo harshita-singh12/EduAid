@@ -1,4 +1,5 @@
 import time
+import uuid
 import torch
 import random
 from transformers import T5ForConditionalGeneration, T5Tokenizer
@@ -368,16 +369,24 @@ class FileProcessor:
             return result.value
 
     def process_file(self, file):
-        file_path = os.path.join(self.upload_folder, file.filename)
+        # The client-supplied filename is untrusted: joining it directly with
+        # the upload folder allows path traversal (e.g. '../../app.py') and
+        # collisions. Store the upload under a server-generated name instead,
+        # keeping only the extension, which also drives text extraction below.
+        extension = os.path.splitext(file.filename)[1]
+        if extension not in ('.txt', '.pdf', '.docx'):
+            return ""
+
+        file_path = os.path.join(self.upload_folder, f"{uuid.uuid4().hex}{extension}")
         file.save(file_path)
         content = ""
 
-        if file.filename.endswith('.txt'):
+        if extension == '.txt':
             with open(file_path, 'r') as f:
                 content = f.read()
-        elif file.filename.endswith('.pdf'):
+        elif extension == '.pdf':
             content = self.extract_text_from_pdf(file_path)
-        elif file.filename.endswith('.docx'):
+        elif extension == '.docx':
             content = self.extract_text_from_docx(file_path)
 
         os.remove(file_path)
