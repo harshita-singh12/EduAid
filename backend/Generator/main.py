@@ -369,10 +369,22 @@ class FileProcessor:
             return result.value
 
     def process_file(self, file):
-        # The client-supplied filename is untrusted: joining it directly with
-        # the upload folder allows path traversal (e.g. '../../app.py') and
-        # collisions. Store the upload under a server-generated name instead,
-        # keeping only the extension, which also drives text extraction below.
+        """Save an uploaded file under a server-generated name and return its extracted text.
+
+        The client-supplied filename is untrusted: joining it directly with the upload folder
+        would allow path traversal (e.g. '../../app.py') and name collisions. The upload is
+        therefore stored as <uuid4><extension>, keeping only the extension, which also drives
+        the text-extraction dispatch below.
+
+        Args:
+            file: An upload object with a ``filename`` attribute and a werkzeug
+                ``FileStorage``-style ``save(path)`` method.
+
+        Returns:
+            The extracted text content, or an empty string when the extension is not one of
+            the supported .txt/.pdf/.docx types; nothing is written to disk in that case and
+            the /upload route responds 400.
+        """
         extension = os.path.splitext(file.filename)[1]
         if extension not in ('.txt', '.pdf', '.docx'):
             return ""
