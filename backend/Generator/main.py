@@ -364,6 +364,7 @@ class FileProcessor:
         return text
 
     def extract_text_from_docx(self, file_path):
+        """Return the raw text content of a .docx file at ``file_path``."""
         with open(file_path, "rb") as docx_file:
             result = mammoth.extract_raw_text(docx_file)
             return result.value
