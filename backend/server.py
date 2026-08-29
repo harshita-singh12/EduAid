@@ -50,6 +50,7 @@ llm_generator = LLMQuestionGenerator()
 
 
 def process_input_text(input_text, use_mediawiki):
+    """Returns a MediaWiki summary of ``input_text`` when ``use_mediawiki`` is 1, else the text unchanged."""
     if use_mediawiki == 1:
         input_text = mediawikiapi.summary(input_text,8)
     return input_text
@@ -57,6 +58,7 @@ def process_input_text(input_text, use_mediawiki):
 
 @app.route("/get_mcq", methods=["POST"])
 def get_mcq():
+    """POST /get_mcq - generates multiple-choice questions from the input text."""
     data = request.get_json()
     input_text = data.get("input_text", "")
     use_mediawiki = data.get("use_mediawiki", 0)
@@ -71,6 +73,7 @@ def get_mcq():
 
 @app.route("/get_boolq", methods=["POST"])
 def get_boolq():
+    """POST /get_boolq - generates boolean (yes/no) questions from the input text."""
     data = request.get_json()
     input_text = data.get("input_text", "")
     use_mediawiki = data.get("use_mediawiki", 0)
@@ -85,6 +88,7 @@ def get_boolq():
 
 @app.route("/get_shortq", methods=["POST"])
 def get_shortq():
+    """POST /get_shortq - generates short-answer questions from the input text."""
     data = request.get_json()
     input_text = data.get("input_text", "")
     use_mediawiki = data.get("use_mediawiki", 0)
@@ -99,6 +103,7 @@ def get_shortq():
 
 @app.route("/get_shortq_llm", methods=["POST"])
 def get_shortq_llm():
+    """POST /get_shortq_llm - generates short-answer questions using the LLM pipeline."""
     try:
         data = request.get_json()
         input_text = data.get("input_text", "")
@@ -114,6 +119,7 @@ def get_shortq_llm():
 
 @app.route("/get_mcq_llm", methods=["POST"])
 def get_mcq_llm():
+    """POST /get_mcq_llm - generates multiple-choice questions using the LLM pipeline."""
     try:
         data = request.get_json()
         input_text = data.get("input_text", "")
@@ -129,6 +135,7 @@ def get_mcq_llm():
 
 @app.route("/get_boolq_llm", methods=["POST"])
 def get_boolq_llm():
+    """POST /get_boolq_llm - generates boolean (yes/no) questions using the LLM pipeline."""
     try:
         data = request.get_json()
         input_text = data.get("input_text", "")
@@ -144,6 +151,7 @@ def get_boolq_llm():
 
 @app.route("/get_problems_llm", methods=["POST"])
 def get_problems_llm():
+    """POST /get_problems_llm - generates a mixed problem set (MCQ, boolean, short) via the LLM pipeline."""
     try:
         data = request.get_json()
         input_text = data.get("input_text", "")
@@ -161,6 +169,7 @@ def get_problems_llm():
 
 @app.route("/get_problems", methods=["POST"])
 def get_problems():
+    """POST /get_problems - generates MCQ, boolean and short questions from the input text."""
     data = request.get_json()
     input_text = data.get("input_text", "")
     use_mediawiki = data.get("use_mediawiki", 0)
@@ -183,6 +192,12 @@ def get_problems():
 
 @app.route("/get_mcq_answer", methods=["POST"])
 def get_mcq_answer():
+    """POST /get_mcq_answer - picks the option closest to the QA model's answer for each MCQ.
+
+    Accepts ``input_text``, ``input_question`` and ``input_options`` (a list of option
+    lists, aligned with the questions). Returns the option with the highest TF-IDF
+    cosine similarity to the generated answer for each question.
+    """
     data = request.get_json()
     input_text = data.get("input_text", "")
     input_questions = data.get("input_question", [])
@@ -216,6 +231,7 @@ def get_mcq_answer():
 
 @app.route("/get_shortq_answer", methods=["POST"])
 def get_answer():
+    """POST /get_shortq_answer - answers each short question against the input text with the QA model."""
     data = request.get_json()
     input_text = data.get("input_text", "")
     input_questions = data.get("input_question", [])
@@ -229,6 +245,7 @@ def get_answer():
 
 @app.route("/get_boolean_answer", methods=["POST"])
 def get_boolean_answer():
+    """POST /get_boolean_answer - returns True/False for each yes/no question via the NLI model."""
     data = request.get_json()
     input_text = data.get("input_text", "")
     input_questions = data.get("input_question", [])
@@ -248,6 +265,7 @@ def get_boolean_answer():
 
 @app.route('/get_content', methods=['POST'])
 def get_content():
+    """POST /get_content - fetches and returns the text content of a Google Docs document."""
     try:
         data = request.get_json()
         document_url = data.get('document_url')
@@ -266,6 +284,12 @@ def get_content():
 
 @app.route("/generate_gform", methods=["POST"])
 def generate_gform():
+    """POST /generate_gform - creates a Google Form from the supplied question/answer pairs.
+
+    Authenticates with the Google Forms API via the local ``token.json``/
+    ``credentials.json`` OAuth flow, then creates a form titled "EduAid form"
+    populated with the given QA pairs.
+    """
     data = request.get_json()
     qa_pairs = data.get("qa_pairs", "")
     question_type = data.get("question_type", "")
@@ -435,6 +459,7 @@ def generate_gform():
 
 @app.route("/get_shortq_hard", methods=["POST"])
 def get_shortq_hard():
+    """POST /get_shortq_hard - generates short questions with the advanced QG model and makes them harder."""
     data = request.get_json()
     input_text = data.get("input_text", "")
     use_mediawiki = data.get("use_mediawiki", 0)
@@ -453,6 +478,7 @@ def get_shortq_hard():
 
 @app.route("/get_mcq_hard", methods=["POST"])
 def get_mcq_hard():
+    """POST /get_mcq_hard - generates MCQs with the advanced QG model and makes them harder."""
     data = request.get_json()
     input_text = data.get("input_text", "")
     use_mediawiki = data.get("use_mediawiki", 0)
@@ -469,6 +495,7 @@ def get_mcq_hard():
 
 @app.route("/get_boolq_hard", methods=["POST"])
 def get_boolq_hard():
+    """POST /get_boolq_hard - generates boolean questions with the advanced QG model and makes them harder."""
     data = request.get_json()
     input_text = data.get("input_text", "")
     use_mediawiki = data.get("use_mediawiki", 0)
@@ -490,6 +517,11 @@ def get_boolq_hard():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
+    """POST /upload - extracts text from an uploaded .txt/.pdf/.docx file.
+
+    Returns the extracted content, or a 400 error when no file is supplied or
+    the file type is unsupported.
+    """
     if 'file' not in request.files:
         return jsonify({"error": "No file part"}), 400
 
@@ -507,6 +539,7 @@ def upload_file():
 
 @app.route("/", methods=["GET"])
 def hello():
+    """GET / - health check endpoint."""
     return "The server is working fine"
 
 def clean_transcript(file_path):
@@ -538,6 +571,11 @@ def clean_transcript(file_path):
 
 @app.route('/getTranscript', methods=['GET'])
 def get_transcript():
+    """GET /getTranscript - downloads a YouTube video's English subtitles and returns the cleaned transcript.
+
+    Requires a ``videoId`` query parameter. Returns a 400 when the ID is
+    missing and a 404 when no subtitles could be downloaded.
+    """
     video_id = request.args.get('videoId')
     if not video_id:
         return jsonify({"error": "No video ID provided"}), 400

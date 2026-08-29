@@ -11,6 +11,7 @@ from typing import List, Mapping
 
 class GoogleDocsService:
     def __init__(self, service_account_file, scopes):
+        """Authenticates with Google Docs using a service account and builds the API client."""
         self.credentials = service_account.Credentials.from_service_account_file(
             service_account_file, scopes=scopes)
         self.docs_service = build('docs', 'v1', credentials=self.credentials)
@@ -48,11 +49,13 @@ class GoogleDocsService:
 
 class FileProcessor:
     def __init__(self, upload_folder='uploads/'):
+        """Creates the upload folder if it does not already exist."""
         self.upload_folder = upload_folder
         if not os.path.exists(self.upload_folder):
             os.makedirs(self.upload_folder)
 
     def extract_text_from_pdf(self, file_path):
+        """Returns the concatenated text content of a PDF file at ``file_path``."""
         doc = fitz.open(file_path)
         text = ""
         for page in doc:
@@ -60,11 +63,19 @@ class FileProcessor:
         return text
 
     def extract_text_from_docx(self, file_path):
+        """Returns the raw text content of a .docx file at ``file_path``."""
         with open(file_path, "rb") as docx_file:
             result = mammoth.extract_raw_text(docx_file)
             return result.value
 
     def process_file(self, file):
+        """Saves an uploaded file and returns its extracted text content.
+
+        The file is stored under its client-supplied name inside the upload
+        folder, deleted after extraction, and dispatched on its extension
+        (.txt, .pdf or .docx). Unsupported extensions yield an empty string,
+        which the /upload route reports as a 400 error.
+        """
         file_path = os.path.join(self.upload_folder, file.filename)
         file.save(file_path)
         content = ""

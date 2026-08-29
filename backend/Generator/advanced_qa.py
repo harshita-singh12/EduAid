@@ -23,6 +23,7 @@ class QuestionGenerator:
     """
 
     def __init__(self) -> None:
+        """Loads the question-generation model and tokenizer, and the QA evaluator."""
 
         QG_PRETRAINED = "iarfmoose/t5-base-question-generator"
         self.ANSWER_TOKEN = "<answer>"
@@ -331,6 +332,7 @@ class QAEvaluator:
     """
 
     def __init__(self) -> None:
+        """Loads the QA-evaluator model and tokenizer used to score question-answer pairs."""
 
         QAE_PRETRAINED = "iarfmoose/bert-base-cased-qa-evaluator"
         self.SEQ_LENGTH = 512

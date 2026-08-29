@@ -23,6 +23,7 @@ from Generator.encoding import beam_search_decoding
 class MCQGenerator:
 
     def __init__(self):
+        """Loads the MCQ question-generation model plus the NLP tools used for keyword extraction."""
         self.tokenizer = T5Tokenizer.from_pretrained('t5-large')
         self.model = T5ForConditionalGeneration.from_pretrained('Roasters/Question-Generator')
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -34,12 +35,23 @@ class MCQGenerator:
         self.set_seed(42)
 
     def set_seed(self, seed):
+        """Seeds NumPy, torch and CUDA RNGs so that generation is reproducible."""
         np.random.seed(seed)
         torch.manual_seed(seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
 
     def generate_mcq(self, payload):
+        """Generates multiple-choice questions from the input text.
+
+        Args:
+            payload: Dict with ``input_text`` (the source text) and an optional
+                ``max_questions`` (number of keywords to base questions on, default 4).
+
+        Returns:
+            A dict with ``statement`` (the processed text), ``questions`` (the generated
+            MCQs) and ``time_taken``; empty if no keywords could be extracted.
+        """
         start_time = time.time()
         inp = {
             "input_text": payload.get("input_text"),
@@ -82,6 +94,7 @@ class MCQGenerator:
 class ShortQGenerator:
 
     def __init__(self):
+        """Loads the short-question generation model plus the NLP tools used for keyword extraction."""
         self.tokenizer = T5Tokenizer.from_pretrained('t5-large')
         self.model = T5ForConditionalGeneration.from_pretrained('Roasters/Question-Generator')
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -93,12 +106,23 @@ class ShortQGenerator:
         self.set_seed(42)
 
     def set_seed(self, seed):
+        """Seeds NumPy, torch and CUDA RNGs so that generation is reproducible."""
         np.random.seed(seed)
         torch.manual_seed(seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
 
     def generate_shortq(self, payload):
+        """Generates short-answer questions from the input text.
+
+        Args:
+            payload: Dict with ``input_text`` (the source text) and an optional
+                ``max_questions`` (number of keywords to base questions on, default 4).
+
+        Returns:
+            A dict with ``statement`` (the processed text) and ``questions`` (the generated
+            short questions); empty if no keywords could be extracted.
+        """
         inp = {
             "input_text": payload.get("input_text"),
             "max_questions": payload.get("max_questions", 4)
@@ -134,6 +158,7 @@ class ShortQGenerator:
 class ParaphraseGenerator:
 
     def __init__(self):
+        """Loads the paraphrasing model and tokenizer."""
         self.tokenizer = T5Tokenizer.from_pretrained('t5-large')
         self.model = T5ForConditionalGeneration.from_pretrained('Roasters/Question-Generator')
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -141,12 +166,23 @@ class ParaphraseGenerator:
         self.set_seed(42)
 
     def set_seed(self, seed):
+        """Seeds NumPy, torch and CUDA RNGs so that generation is reproducible."""
         np.random.seed(seed)
         torch.manual_seed(seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
 
     def generate_paraphrase(self, payload):
+        """Generates paraphrases of the input sentence.
+
+        Args:
+            payload: Dict with ``input_text`` (the sentence to paraphrase) and an optional
+                ``max_questions`` (number of paraphrases to produce, default 3).
+
+        Returns:
+            A dict with ``Original Sentence``, ``Count`` and ``Paraphrased Questions``
+            (the deduplicated, distinct paraphrases).
+        """
         start_time = time.time()
         inp = {
             "input_text": payload.get("input_text"),
@@ -192,6 +228,7 @@ class ParaphraseGenerator:
 class BoolQGenerator:
 
     def __init__(self):
+        """Loads the boolean-question generation model and tokenizer."""
         self.tokenizer = T5Tokenizer.from_pretrained('t5-base')
         self.model = T5ForConditionalGeneration.from_pretrained('Roasters/Boolean-Questions')
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -199,17 +236,29 @@ class BoolQGenerator:
         self.set_seed(42)
 
     def set_seed(self, seed):
+        """Seeds NumPy, torch and CUDA RNGs so that generation is reproducible."""
         np.random.seed(seed)
         torch.manual_seed(seed)
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
 
     def random_choice(self):
+        """Returns a random boolean, used as the answer for generated boolean questions."""
         a = random.choice([0,1])
         return bool(a)
 
 
     def generate_boolq(self, payload):
+        """Generates boolean (yes/no) questions from the input text.
+
+        Args:
+            payload: Dict with ``input_text`` (the source text) and an optional
+                ``max_questions`` (number of questions to generate, default 4).
+
+        Returns:
+            A dict with ``Text`` (the source text), ``Count`` (number of questions)
+            and ``Boolean_Questions`` (the generated questions).
+        """
         start_time = time.time()
         inp = {
             "input_text": payload.get("input_text"),
