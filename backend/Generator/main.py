@@ -357,6 +357,7 @@ class FileProcessor:
             os.makedirs(self.upload_folder)
 
     def extract_text_from_pdf(self, file_path):
+        """Returns the concatenated text content of a PDF file at ``file_path``."""
         doc = fitz.open(file_path)
         text = ""
         for page in doc:
